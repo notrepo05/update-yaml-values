@@ -83,12 +83,12 @@ func main() {
 	filename := os.Args[1]
 	updatedFile, err := UpdateSecrets(filename)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "update-secrets failed: %s", err)
+		_, _ = fmt.Fprintf(os.Stderr, "update-secrets failed: %s\n", err)
 		os.Exit(1)
 	}
 	err = marshalYaml(updatedFile, os.Stdout)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "update-secrets failed: %s", err)
+		_, _ = fmt.Fprintf(os.Stderr, "update-secrets failed: %s\n", err)
 		os.Exit(1)
 	}
 }
