@@ -14,6 +14,7 @@ resource_types:
 resources: abc
 
 Usage example
+
 ```
 nr $ ./update-secrets ./fixtures/pipeline-2.yml
 resource_types:
