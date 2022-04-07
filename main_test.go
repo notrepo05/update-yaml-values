@@ -12,7 +12,7 @@ var parseTests = []struct {
 	{"./fixtures/pipeline-2.yml", "./fixtures/pipeline-2-updated.yml"},
 }
 
-func TestWalk(t *testing.T) {
+func TestUpdateSecrets(t *testing.T) {
 	for _, test := range parseTests {
 		got, err := UpdateSecrets(test.filename)
 		if err != nil {
