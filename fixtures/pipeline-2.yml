@@ -1,0 +1,8 @@
+resource_types:
+  - name: gcs-resource
+    type: registry-image
+    source:
+      repository: gcr.io/tas-ppe/pivotalcfreleng/gcs-resource
+      username: _json_key
+      password: ((dependabot.ppe_gcr_service_account_key))
+resources: abc

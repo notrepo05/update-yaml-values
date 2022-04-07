@@ -2,13 +2,16 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
+	"os"
 	"reflect"
 	"regexp"
+	"strings"
 )
 import "gopkg.in/yaml.v2"
 
-func loadYaml(filename string) (map[string]interface{}, error) {
+func unmarshalYaml(filename string) (map[string]interface{}, error) {
 	pipeline := map[string]interface{}{}
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -22,12 +25,19 @@ func loadYaml(filename string) (map[string]interface{}, error) {
 	return pipeline, nil
 }
 
-func UpdateSecrets(filename string) (map[string]interface{}, error) {
-	pipeline, _ := loadYaml(filename)
+func marshalYaml(unmarshalledYaml map[string]interface{}, writer io.Writer) error {
+	encoder := yaml.NewEncoder(writer)
+	err := encoder.Encode(unmarshalledYaml)
+	return err
+}
 
+func UpdateSecrets(filename string) (map[string]interface{}, error) {
+	pipeline, err := unmarshalYaml(filename)
+	if err != nil {
+		return nil, err
+	}
 	walkAndUpdate(reflect.ValueOf(pipeline))
 
-	fmt.Printf("\n\n+%v\n\n", pipeline)
 	return pipeline, nil
 }
 
@@ -35,8 +45,8 @@ func walkAndUpdate(v reflect.Value) {
 	if v.IsNil() {
 		return
 	}
-	// dereference pointers
-	if v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
+	// dereference pointers (to pointers of pointers of pointers...)
+	for v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface {
 		v = v.Elem()
 	}
 
@@ -49,9 +59,12 @@ func walkAndUpdate(v reflect.Value) {
 		for _, k := range v.MapKeys() {
 			elem := v.MapIndex(k).Elem()
 			if elem.Kind() == reflect.String {
-				matchString, _ := regexp.MatchString(`^\(\(.*\)\).*`, elem.String())
-				if matchString {
-					v.SetMapIndex(k, reflect.ValueOf("newSecret"))
+				secretMatcher := regexp.MustCompile(`^\(\((.*)\)\).*`)
+				secretGroups := secretMatcher.FindStringSubmatch(elem.String())
+				if len(secretGroups) > 1 {
+					splitSections := strings.Split(secretGroups[1], ".")
+					newSecret := fmt.Sprintf("((%s.%s))", splitSections[0], strings.Join(splitSections, "."))
+					v.SetMapIndex(k, reflect.ValueOf(newSecret))
 				}
 			}
 
@@ -62,5 +75,20 @@ func walkAndUpdate(v reflect.Value) {
 }
 
 func main() {
-	fmt.Println("hello")
+	if len(os.Args) < 2 {
+		fmt.Println("USAGE: update-secrets filename")
+		return
+	}
+
+	filename := os.Args[1]
+	updatedFile, err := UpdateSecrets(filename)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "update-secrets failed: %s", err)
+		os.Exit(1)
+	}
+	err = marshalYaml(updatedFile, os.Stdout)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "update-secrets failed: %s", err)
+		os.Exit(1)
+	}
 }

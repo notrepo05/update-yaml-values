@@ -1,0 +1,45 @@
+resource_types:
+  - name: gcs-resource
+    type: registry-image
+    source:
+      repository: gcr.io/tas-ppe/pivotalcfreleng/gcs-resource
+      username: _json_key
+      password: ((dependabot.ppe_gcr_service_account_key))
+  - name: gcs-resource-2
+    type: registry-image
+    source:
+      repository: gcr.io/tas-ppe/pivotalcfreleng/gcs-resource
+      username: _json_key
+      password: ((dependabot.ppe_gcr_service_account_key))
+resources:
+  - name: dependabot-core
+    type: git
+    source:
+      uri: git@github.com:pivotal/dependabot-core.git
+      private_key: ((dependabot.private_key))
+  - name: dependabot-common-gem
+    type: gcs-resource
+    source:
+      bucket: dependabot-autobump-gems
+      json_key: ((dependabot.gcp_service_account_key))
+      versioned_file: dependabot-common.gem
+  - name: dependabot-kiln-gem
+    type: gcs-resource
+    source:
+      bucket: dependabot-autobump-gems
+      json_key: ((dependabot.gcp_service_account_key))
+      versioned_file: dependabot-kiln.gem
+  - name: pivotalcfreleng-dependabot
+    type: registry-image
+    source:
+      repository: gcr.io/tas-ppe/pivotalcfreleng/dependabot
+      username: _json_key
+      password: ((dependabot.ppe_gcr_service_account_key))
+  - name: every-60-minutes
+    type: time
+    source:
+      interval: 60m
+jobs:
+  - name: autobump-main
+    max_in_flight: 1
+    plan:

@@ -18,7 +18,7 @@ func TestWalk(t *testing.T) {
 		if err != nil {
 			t.Errorf("err %+v", err)
 		}
-		expected, err := loadYaml(test.expected)
+		expected, err := unmarshalYaml(test.expected)
 		if err != nil {
 			t.Error("failed to load test data")
 		}
