@@ -7,32 +7,23 @@ import (
 
 var parseTests = []struct {
 	filename string
-	expected []ResourceTypes
+	expected string
 }{
-	{"./fixtures/pipeline-1.yml", []ResourceTypes{{"gcs-resource"}, {"gcs-resource-2"}}},
-	{"./fixtures/pipeline-2.yml", []ResourceTypes{{"gcs-resource"}}},
+	{"./fixtures/pipeline-2.yml", "./fixtures/pipeline-2-updated.yml"},
 }
 
 func TestWalk(t *testing.T) {
-	got, _ := Walk("./fixtures/pipeline-2.yml")
-	expected, err := loadYaml("./fixtures/pipeline-2-updated.yml")
-	if err != nil {
-		t.Error("failed to load test data")
-	}
-	if !reflect.DeepEqual(got, expected) {
-		t.Errorf("got: %+v != expected: %+v", got, expected)
-	}
-}
-
-func TestParse(t *testing.T) {
 	for _, test := range parseTests {
-		got, err := Parse(test.filename)
+		got, err := UpdateSecrets(test.filename)
 		if err != nil {
 			t.Errorf("err %+v", err)
 		}
-		if !reflect.DeepEqual(got, test.expected) {
-			t.Errorf("err: %+v != %+v", got, test.expected)
+		expected, err := loadYaml(test.expected)
+		if err != nil {
+			t.Error("failed to load test data")
 		}
-
+		if !reflect.DeepEqual(got, expected) {
+			t.Errorf("err: %+v != %+v", got, expected)
+		}
 	}
 }
