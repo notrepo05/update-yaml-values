@@ -1,8 +1,6 @@
 package main
 
 import (
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"reflect"
 	"testing"
 )
@@ -13,19 +11,6 @@ var parseTests = []struct {
 }{
 	{"./fixtures/pipeline-1.yml", []ResourceTypes{{"gcs-resource"}, {"gcs-resource-2"}}},
 	{"./fixtures/pipeline-2.yml", []ResourceTypes{{"gcs-resource"}}},
-}
-
-func loadYaml(filename string) (map[string]interface{}, error) {
-	pipeline := map[string]interface{}{}
-	file, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	err = yaml.Unmarshal(file, &pipeline)
-	if err != nil {
-		return nil, err
-	}
-	return pipeline, nil
 }
 
 func TestWalk(t *testing.T) {

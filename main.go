@@ -16,7 +16,7 @@ type ResourceTypes struct {
 	Name string `yaml:"name"`
 }
 
-func Walk(filename string) (map[string]interface{}, error) {
+func loadYaml(filename string) (map[string]interface{}, error) {
 	pipeline := map[string]interface{}{}
 	file, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -26,6 +26,12 @@ func Walk(filename string) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return pipeline, nil
+}
+
+func Walk(filename string) (map[string]interface{}, error) {
+	pipeline, _ := loadYaml(filename)
 
 	walk(reflect.ValueOf(pipeline))
 
