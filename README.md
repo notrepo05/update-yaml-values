@@ -12,6 +12,7 @@ resource_types:
       username: _json_key
       password: ((dependabot.ppe_gcr_service_account_key))
 resources: abc
+```
 
 Usage example
 
@@ -25,4 +26,5 @@ resource_types:
     username: _json_key
   type: registry-image
 resources: abc
+
 ```
